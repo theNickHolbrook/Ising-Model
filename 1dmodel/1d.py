@@ -22,7 +22,6 @@ rep = spins.copy()
 fig, ax = plt.subplots()
 for temp in range(10):
     temp += 1
-# if True:
     for j in range(100000):
         for index, val in enumerate(spins):
             
