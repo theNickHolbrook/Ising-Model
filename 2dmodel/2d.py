@@ -34,7 +34,6 @@ lattice = set_lattice(lattice)
 #resets the lattice to random spins
 def reset_lattice(lattice):
     lattice = np.zeros((len(lattice), len(lattice[0])), dtype=int)
-    plot_model(lattice, 0)
     lattice = set_lattice(lattice)
     return lattice
 
@@ -125,12 +124,13 @@ def plot_model(lattice, count):
 for graph_index, temp in enumerate(graph[0]):
     # for counts in range(100000):
     #     model(lattice, temp)
-    for i in range(1000):
+    for i in range(20000):
         model(lattice, temp)
-        plot_model(lattice, i)
+        if i % 20 == 0:
+            plot_model(lattice, i)
     graph[1][graph_index] = getE(lattice)
     lattice = reset_lattice(lattice)
-    print("HERE")
+    print("New temp")
 # ax2.plot(graph[0], graph[1])
 # plt.ioff()
 # fig3.show()
