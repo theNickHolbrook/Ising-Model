@@ -27,13 +27,16 @@ def set_lattice(lattice):
                 lattice[i][j] = -1
             else:
                 lattice[i][j] = 1
+    return lattice
 
-set_lattice(lattice)
+lattice = set_lattice(lattice)
 
 #resets the lattice to random spins
 def reset_lattice(lattice):
-    lattice = np.zeros((10, 10), dtype=int)
-    set_lattice(lattice)
+    lattice = np.zeros((len(lattice), len(lattice[0])), dtype=int)
+    plot_model(lattice, 0)
+    lattice = set_lattice(lattice)
+    return lattice
 
 
 #gets the column neighbors energy
@@ -90,8 +93,9 @@ def model(lattice, temp):
 
 #first one is the only important one its to show the model the others I don't remember
 fig1, ax1 = plt.subplots()
-fig2, ax2 = plt.subplots()
-fig3, ax3 = plt.subplots()
+im = ax1.imshow(lattice, origin='lower', cmap='magma')
+# fig2, ax2 = plt.subplots()
+# fig3, ax3 = plt.subplots()
 
 # def plot_energy(lattice, count, index):
 #     E = getE(lattice)
@@ -104,20 +108,29 @@ fig3, ax3 = plt.subplots()
     
     
 #plots the model
-def plot_model(lattice):
-    ax1.imshow(lattice, origin='lower', cmap='magma')
-    fig1.show()
-    plt.pause(0.01)
+def plot_model(lattice, count):
+    # ax1.imshow(lattice, origin='lower', cmap='magma')
+    # fig1.canvas.restore_region(axbackground)
+    # ax1.draw_artist(lattice)
+    # fig1.canvas.blit(ax1.bbox)
+    # fig1.canvas.draw()
+    # fig1.canvas.flush_events()
+    im.set_data(lattice)
+    fig1.canvas.draw()
+    # plt.pause(0.000001)
+    fig1.canvas.flush_events()
+    print(count)
 
 #main loop
 for graph_index, temp in enumerate(graph[0]):
-    for counts in range(100000):
+    # for counts in range(100000):
+    #     model(lattice, temp)
+    for i in range(1000):
         model(lattice, temp)
-    for i in range(10):
-        model(lattice, temp)
-        plot_model(lattice)
+        plot_model(lattice, i)
     graph[1][graph_index] = getE(lattice)
-    reset_lattice(lattice)
-ax2.plot(graph[0], graph[1])
-plt.ioff()
-fig3.show()
+    lattice = reset_lattice(lattice)
+    print("HERE")
+# ax2.plot(graph[0], graph[1])
+# plt.ioff()
+# fig3.show()
