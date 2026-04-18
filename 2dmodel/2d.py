@@ -8,10 +8,10 @@ graph = [
     [0.0] * 10#C/Nk 
 ]
 
-# energies = [
-#     [[],#count
-#      []]#energies
-# ]
+energies = [
+    [[],#count
+     []]#energies
+]
 
 #allows for interactivity, so we can update the plot
 plt.ion()
@@ -62,9 +62,10 @@ def get_E_i(i, I_spins, spin):
 def getE(lattice):
     sum = 0
     N = len(lattice) * len(lattice[0])
-    for j, j_spins in enumerate(lattice):
-        for i_spin in j_spins:
-            sum += i_spin / N
+    for j, I_spins in enumerate(lattice):
+        for i, i_spin in enumerate(I_spins):
+            sum += abs(get_E_i(i, I_spins, i_spin))
+            sum += abs(get_E_j(j, lattice, i, i_spin))
     return sum
 
 #picks a random atom to see if it should flip the spin of it
@@ -93,17 +94,17 @@ def model(lattice, temp):
 #first one is the only important one its to show the model the others I don't remember
 fig1, ax1 = plt.subplots()
 im = ax1.imshow(lattice, origin='lower', cmap='magma')
-# fig2, ax2 = plt.subplots()
-# fig3, ax3 = plt.subplots()
+fig2, ax2 = plt.subplots()
+fig3, ax3 = plt.subplots()
 
-# def plot_energy(lattice, count, index):
-#     E = getE(lattice)
-#     if index >= len(energies):
-#         energies.append([[],[]])
-#     energies[index][0].append(count)
-#     energies[index][1].append(E)
-#     ax3.plot(energies[index][0], energies[index][1], label=str(graph[0][index]))
-#     fig3.show()
+def plot_energy(lattice, count, index):
+    E = getE(lattice)
+    if index >= len(energies):
+        energies.append([[],[]])
+    energies[index][0].append(count)
+    energies[index][1].append(E)
+    ax3.plot(energies[index][0], energies[index][1], label=str(graph[0][index]))
+    fig3.show()
     
     
 #plots the model
@@ -124,13 +125,14 @@ def plot_model(lattice, count):
 for graph_index, temp in enumerate(graph[0]):
     # for counts in range(100000):
     #     model(lattice, temp)
-    for i in range(20000):
+    for i in range(100000):
         model(lattice, temp)
-        if i % 20 == 0:
-            plot_model(lattice, i)
+        # if i % 1000 == 0:
+        #     plot_model(lattice, i)
     graph[1][graph_index] = getE(lattice)
     lattice = reset_lattice(lattice)
     print("New temp")
-# ax2.plot(graph[0], graph[1])
-# plt.ioff()
-# fig3.show()
+ax2.plot(graph[0], graph[1])
+plt.ioff()
+fig3.show()
+plt.show()
