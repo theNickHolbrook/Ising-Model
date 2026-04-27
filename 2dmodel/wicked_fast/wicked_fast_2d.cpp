@@ -28,9 +28,11 @@
 // ── tuneable constants ────────────────────────────────────────────────────────
 static const int    LENGTH      = 64;   // lattice side (must be even)
 static const int    SCALE       = 8;    // pixels per spin
-static const int    SPIN_FLIPS  = 20000; // outer MC steps
-static const double TEMP        = 1; // near critical temp (Tc ≈ 2.269)
+static const int    SPIN_FLIPS  = 10000; // outer MC steps
+static       double TEMP        = 3.5; // near critical temp (Tc ≈ 2.269)
 static const int    FRAME_EVERY = 20;   // save a frame every N steps
+static const bool   VID         = true; // for making a video
+// static const bool   PLOT        = false;  // for plotting hamiltonian, not working
 
 // ── minimal BMP writer ────────────────────────────────────────────────────────
 // Writes a 24-bit RGB BMP. Returns true on success.
@@ -107,6 +109,22 @@ public:
         }
     }
 
+    int hamiltonian(){
+        int H = 0;
+        for (int j = 0; j < LENGTH; j++){
+            for (int i = 0; i < LENGTH; i++){
+                int s     = arr[j][i];
+                int up    = arr[(j == 0)          ? LENGTH - 1 : j - 1][i];
+                int down  = arr[(j == LENGTH - 1) ? 0          : j + 1][i];
+                int left  = arr[j][(i == 0)          ? LENGTH - 1 : i - 1];
+                int right = arr[j][(i == LENGTH - 1) ? 0          : i + 1];
+                H -= s * (up + down + left + right);
+            }
+        }
+
+        return H;
+    }
+
     bool write_frame(const char* filename) const {
         const int W   = LENGTH * SCALE;
         const int H   = LENGTH * SCALE;
@@ -172,7 +190,9 @@ int main() {
     Lattice lattice;
     int frame_idx = 0;
     char path[256];
-
+    // int H1, H2 = 0;
+    // for (double temp = 0.1; temp < 5; temp += 0.1){
+        // if (PLOT) {TEMP = temp;}
     for (int step = 0; step < SPIN_FLIPS; ++step) {
 
         // Red squares: i+j even
@@ -185,7 +205,7 @@ int main() {
             for (int i = 1 - (j & 1); i < LENGTH; i += 2)
                 lattice.metropolis(i, j, TEMP);
 
-        if (step % FRAME_EVERY == 0) {
+        if (step % FRAME_EVERY == 0 && VID) {
             snprintf(path, sizeof(path), "frames/frame_%05d.bmp", frame_idx);
             if (lattice.write_frame(path)) {
                 std::cout << "wrote " << path << "\n";
@@ -197,11 +217,17 @@ int main() {
             }
         }
     }
-
+    // H1 = lattice.hamiltonian();
+    // double C = (H2 - H1) / 0.1;
+    // std::cout << "Temp: " << TEMP << " Hamiltonian: " << H1 << " Specific Heat: " << C << std::endl;
+    // H2 = H1;
+    // }
+    // if (VID){
     std::cout << "\nDone. " << frame_idx << " frames in frames/\n\n"
               << "Compile video:\n"
               << "  ffmpeg -framerate 30 -i frames/frame_%05d.bmp"
                  " -c:v libx264 -pix_fmt yuv420p ising.mp4\n\n";
+    // }
 
 #ifdef _WIN32
     std::cout << "Press Enter to exit...\n";
